@@ -1,6 +1,8 @@
 package db_test
 
 import (
+	"database/sql"
+	"strconv"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -908,4 +910,62 @@ var _ = Describe("VolumeFactory", func() {
 			})
 		})
 	})
+
+	// TODO AllVolumes volumes
+	/*
+	FDescribe("Volumes from different teams", func() {
+		var (
+			err    error
+			result sql.Result
+		)
+
+		var createVolumeWithTeamNameAndID = func(id int, name string) {
+			result, err = psql.Insert("teams").SetMap(map[string]interface{}{
+				"id":   id,
+				"name": name,
+			}).RunWith(dbConn).Exec()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result.RowsAffected()).To(Equal(int64(1)))
+
+			result, err = psql.Insert("volumes").SetMap(map[string]interface{}{
+				"handle":      "handle-id-" + strconv.Itoa(id),
+				"worker_name": defaultWorker.Name(),
+				"team_id":     id,
+			}).RunWith(dbConn).Exec()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result.RowsAffected()).To(Equal(int64(1)))
+		}
+
+		Context("AllVolumes", func() {
+			BeforeEach(func() {
+				createVolumeWithTeamNameAndID(111, "team1")
+				createVolumeWithTeamNameAndID(222, "team2")
+			})
+
+			It("returns all volumes", func() {
+				allVolumes, err := volumeRepository.AllVolumes()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(allVolumes)).To(Equal(2))
+				Expect(allVolumes[0].TeamName()).To(Equal("team1"))
+				Expect(allVolumes[1].TeamName()).To(Equal("team2"))
+			})
+		})
+
+		Context("VisibleContainers", func() {
+			BeforeEach(func() {
+				createVolumeWithTeamNameAndID(111, "team1")
+				createVolumeWithTeamNameAndID(222, "team2")
+				createVolumeWithTeamNameAndID(333, "team3")
+			})
+
+			It("returns visible containers for the given teams", func() {
+				visibleContainers, err := volumeRepository.VisibleVolumes([]string{"team1", "team2"})
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(visibleContainers).To(HaveLen(2))
+				Expect(visibleContainers[0].TeamName()).To(Equal("team1"))
+				Expect(visibleContainers[1].TeamName()).To(Equal("team2"))
+			})
+		})
+	}) */
 })

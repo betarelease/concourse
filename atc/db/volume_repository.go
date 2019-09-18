@@ -42,6 +42,8 @@ type VolumeRepository interface {
 
 	UpdateVolumesMissingSince(workerName string, handles []string) error
 	RemoveMissingVolumes(gracePeriod time.Duration) (removed int, err error)
+	// AllVolumes()
+	// VisibleVolumes(teamName []string) (volumes []Volume, err error)
 }
 
 const noTeam = 0
@@ -790,3 +792,17 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 
 	return nil, nil, nil, nil, nil
 }
+
+// TODO: implement these functions
+
+/*
+
+func AllVolumes() {
+
+}
+
+func VisibleVolumes(teamName []string) (volumes []Volume, err error) {
+
+}
+
+*/
