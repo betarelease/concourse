@@ -2,10 +2,11 @@ package commands
 
 import (
 	"errors"
-	"github.com/concourse/concourse/go-concourse/concourse"
 	"os"
 	"sort"
 	"strconv"
+
+	"github.com/concourse/concourse/go-concourse/concourse"
 
 	"github.com/concourse/concourse/atc"
 	"github.com/concourse/concourse/fly/commands/internal/displayhelpers"
@@ -14,10 +15,14 @@ import (
 	"github.com/fatih/color"
 )
 
+type TeamsParam struct {
+	AllTeams bool     `short:"a" long:"all-teams" description:"Run the command for all teams"`
+	Teams    []string `short:"n" long:"team" description:"Run the command for a list of teams"`
+}
+
 type ContainersCommand struct {
-	AllTeams bool     `short:"a" long:"all-teams" description:"Show containers for all available teams"`
-	Json     bool     `long:"json" description:"Print command result as JSON"`
-	Teams    []string `short:"n" long:"team" description:"Show containers for the given teams"`
+	Json bool `long:"json" description:"Print command result as JSON"`
+	TeamsParam
 }
 
 func (command *ContainersCommand) Execute([]string) error {
