@@ -136,11 +136,12 @@ var _ = Describe("Containers API", func() {
 			BeforeEach(func() {
 				fakeaccess.IsAuthenticatedReturns(true)
 				fakeaccess.IsAuthorizedReturns(true)
+				fakeaccess.IsAdminReturns(false)
 			})
 
 			Context("when no errors are returned", func() {
 				BeforeEach(func() {
-					dbTeam.ContainersReturns([]db.Container{fakeContainer1, fakeContainer2}, nil)
+					fakeContainerRepository.VisibleContainersReturns([]db.Container{fakeContainer1, fakeContainer2}, nil)
 				})
 
 				It("returns 200", func() {
@@ -170,7 +171,7 @@ var _ = Describe("Containers API", func() {
 
 			Context("when no containers are found", func() {
 				BeforeEach(func() {
-					dbTeam.ContainersReturns([]db.Container{}, nil)
+					fakeContainerRepository.VisibleContainersReturns([]db.Container{}, nil)
 				})
 
 				It("returns 200", func() {
@@ -200,7 +201,7 @@ var _ = Describe("Containers API", func() {
 
 				BeforeEach(func() {
 					expectedErr = errors.New("some error")
-					dbTeam.ContainersReturns(nil, expectedErr)
+					fakeContainerRepository.VisibleContainersReturns([]db.Container{}, expectedErr)
 				})
 
 				It("returns 500", func() {
@@ -211,22 +212,8 @@ var _ = Describe("Containers API", func() {
 				})
 			})
 		})
-
-		// not authenticated
-		// 		401
-		// authenticated
-		//    right content-type (application/json)
-		//    successful
-		//    authorized for some teams team
-		//       just show containers for those teams
-		//    admin
-		//       see all
-		//   parameters (?)
-		//      should hijack use this endpoint?
-
 	})
 
-	//////////////////////////////////////////////////////////////////
 	Describe("GET /api/v1/teams/a-team/containers", func() {
 		BeforeEach(func() {
 			var err error
@@ -486,7 +473,6 @@ var _ = Describe("Containers API", func() {
 			})
 		})
 	})
-	//////////////////////////////////////////////////////////////////
 
 	Describe("GET /api/v1/containers/:id", func() {
 		var handle = "some-handle"

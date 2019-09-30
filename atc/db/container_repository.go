@@ -28,6 +28,8 @@ type containerRepository struct {
 	lockFactory lock.LockFactory // TODO
 }
 
+var containerColumns []string = append([]string{"id", "handle", "worker_name", "hijacked", "discontinued", "state"}, containerMetadataColumns...)
+
 func NewContainerRepository(conn Conn, lockFactory lock.LockFactory) ContainerRepository {
 	return &containerRepository{
 		conn:        conn,
@@ -275,49 +277,37 @@ func (repository *containerRepository) FindOrphanedContainers() ([]CreatingConta
 }
 
 func selectContainers(asOptional ...string) sq.SelectBuilder {
-	columns := []string{"id", "handle", "worker_name", "hijacked", "discontinued", "state"}
-
-	columns = append(columns, containerMetadataColumns...)
 	table := "containers"
-	teamId := "team_id"
-	as := "c"
-	if len(asOptional) > 0 {
-		as = asOptional[0]
-	}
-
-	for i, c := range columns {
-		columns[i] = as + "." + c
-	}
-
-	table += " " + as
-	teamId = as + "." + teamId
-
-	columns = append(columns, "COALESCE(t.name, '') as team_name")
-
-	return psql.Select(columns...).From(table).LeftJoin("teams as t ON t.id =" + teamId)
-}
-
-
-func selectContainersWithAdditionalColumns(asOptional ...string) sq.SelectBuilder {
-	columns := []string{"id", "handle", "worker_name", "hijacked", "discontinued", "state"}
-
-	columns = append(columns, containerMetadataColumns...)
-	table := "containers"
-	teamId := "team_id"
 	if len(asOptional) > 0 {
 		as := asOptional[0]
-		for i, c := range columns {
-			columns[i] = as + "." + c
+		for i, c := range containerColumns {
+			containerColumns[i] = as + "." + c
+		}
+
+		table += " " + as
+	}
+
+	return psql.Select(containerColumns...).From(table)
+}
+
+func selectContainersWithAdditionalColumns(asOptional ...string) sq.SelectBuilder {
+	table := "containers"
+	as := "c"
+	teamId := "team_id"
+	if len(asOptional) > 0 {
+		as = asOptional[0]
+
+		for i, c := range containerColumns {
+			containerColumns[i] = as + "." + c
 		}
 
 		table += " " + as
 		teamId = as + "." + teamId
-	}
-	if len(asOptional) > 1 {
-		columns = append(columns, asOptional[1:]...)
+
+		containerColumns = append(containerColumns, "COALESCE(t.name, '') as team_name")
 	}
 
-	return psql.Select(columns...).From(table)
+	return psql.Select(containerColumns...).From(table).LeftJoin("teams as t ON t.id =" + teamId)
 }
 
 func scanContainer(row sq.RowScanner, conn Conn) (CreatingContainer, CreatedContainer, DestroyingContainer, FailedContainer, error) {
